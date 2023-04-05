@@ -1,4 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../../drishya_picker/drishya_picker.dart';
 import '../../../../drishya_picker/src/animations/animations.dart';
@@ -9,9 +14,6 @@ import '../../../../drishya_picker/src/gallery/src/widgets/gallery_asset_selecto
 import '../../../../drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import '../../../../drishya_picker/src/gallery/src/widgets/send_button.dart';
 import '../../../../drishya_picker/src/gallery/src/widgets/widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
 
 ///
 ///
@@ -32,7 +34,7 @@ class GalleryView extends StatefulWidget {
 
   ///
   static const String name = 'GalleryView';
-  final void Function(String?)? onpress;
+  final void Function(File?)? onpress;
 
   ///
   /// Pick media
@@ -98,7 +100,7 @@ class _GalleryViewState extends State<GalleryView> {
     // Full screen mode
     return PanelSettingBuilder(
       setting: widget.setting?.panelSetting,
-      builder: (panelSetting) => _View(
+      builder: (PanelSetting panelSetting) => _View(
         controller: _controller,
         onpress: widget.onpress!,
         setting: (widget.setting ?? _controller.setting)
@@ -122,7 +124,7 @@ class _View extends StatefulWidget {
 
   final GalleryController controller;
   final GallerySetting setting;
-  final void Function(String?) onpress;
+  final void Function(File?) onpress;
 
   @override
   State<_View> createState() => _ViewState();
@@ -182,7 +184,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
 
   //
   void _showAlert() {
-    final cancel = TextButton(
+    final TextButton cancel = TextButton(
       onPressed: Navigator.of(context).pop,
       child: Text(
         'CANCEL',
@@ -191,7 +193,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
             ),
       ),
     );
-    final unselectItems = TextButton(
+    final TextButton unselectItems = TextButton(
       onPressed: _onSelectionClear,
       child: Text(
         'USELECT ITEMS',
@@ -201,7 +203,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
       ),
     );
 
-    final alertDialog = AlertDialog(
+    final AlertDialog alertDialog = AlertDialog(
       title: Text(
         'Unselect these items?',
         style: Theme.of(context).textTheme.headline6!.copyWith(
@@ -225,7 +227,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
 
     showDialog<void>(
       context: context,
-      builder: (context) => alertDialog,
+      builder: (BuildContext context) => alertDialog,
     );
   }
 
@@ -272,8 +274,8 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final panelSetting = widget.setting.panelSetting!;
-    final actionMode =
+    final PanelSetting panelSetting = widget.setting.panelSetting!;
+    final bool actionMode =
         _controller.setting.selectionMode == SelectionMode.actionBased;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -302,7 +304,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                   children: [
                     // Header space
                     Builder(
-                      builder: (context) {
+                      builder: (BuildContext context) {
                         // Header space for full screen mode
                         // if (_controller.fullScreenMode) {
                         //   return SizedBox(height: panelSetting.headerMaxHeight);
@@ -311,11 +313,13 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                         // Toogling size for header hiding animation
                         return ValueListenableBuilder<PanelValue>(
                           valueListenable: _panelController,
-                          builder: (context, value, child) {
-                            final height = (panelSetting.headerMaxHeight *
-                                    value.factor *
-                                    1.2)
-                                .clamp(
+                          builder: (BuildContext context, PanelValue value,
+                              Widget? child) {
+                            final double height =
+                                (panelSetting.headerMaxHeight *
+                                        value.factor *
+                                        1.2)
+                                    .clamp(
                               panelSetting.thumbHandlerHeight,
                               panelSetting.headerMaxHeight,
                             );
@@ -340,7 +344,8 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                       flex: 65,
                       child: StreamBuilder<dynamic>(
                         stream: VideoplayerValue.videoControllerStream,
-                        builder: (context, snapshot) {
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
                           return Container(
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             decoration: const BoxDecoration(),
@@ -395,8 +400,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                                           ),
                                           onPressed: () {
                                             widget.onpress(
-                                              VideoplayerValue.videoPlayerPath!
-                                                  .toString(),
+                                              VideoplayerValue.videoPlayerPath,
                                             );
                                           },
                                           child: const Text(
@@ -453,8 +457,8 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                 // Album list
                 AnimatedBuilder(
                   animation: _animation,
-                  builder: (context, child) {
-                    final offsetY = panelSetting.headerMaxHeight +
+                  builder: (BuildContext context, Widget? child) {
+                    final double offsetY = panelSetting.headerMaxHeight +
                         (panelSetting.maxHeight! -
                                 panelSetting.headerMaxHeight) *
                             (1 - _animation.value);
