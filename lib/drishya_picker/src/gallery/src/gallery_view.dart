@@ -399,6 +399,13 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                                             ),
                                           ),
                                           onPressed: () {
+                                            if (VideoplayerValue
+                                                    .videoPlayerController !=
+                                                null) {
+                                              VideoplayerValue
+                                                  .videoPlayerController!
+                                                  .pause();
+                                            }
                                             widget.onpress(
                                               VideoplayerValue.videoPlayerPath,
                                             );
