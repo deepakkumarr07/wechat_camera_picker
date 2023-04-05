@@ -13,6 +13,15 @@ dependencies:
 
   camera: ^0.10.0
   camera_platform_interface: ^2.1.5
-  path: ^1.8.0
-  photo_manager: ^2.4.0
-  video_player: ^2.3.2
+  collection: ^1.16.0
+  meta: ^1.7.0
+  path: ^1.8.1
+  photo_manager: ^2.1.4
+  uuid: ^3.0.6
+  video_player: 
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^3.0.1

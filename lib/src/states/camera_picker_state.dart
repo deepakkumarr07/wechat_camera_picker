@@ -292,14 +292,12 @@ class CameraPickerState extends State<CameraPicker>
             e.lensDirection == pickerConfig.preferredLensDirection,
       );
       final int index;
-      print('PREFERREDINDEX: $preferredIndex');
       if (preferredIndex != -1 && c == null) {
         index = preferredIndex;
         currentCameraIndex = preferredIndex;
       } else {
         index = currentCameraIndex;
       }
-      print('INDEX: $index');
       // Initialize the controller with the given resolution preset.
       final CameraController newController = CameraController(
         cameraDescription ?? cameras[index],
@@ -389,7 +387,6 @@ class CameraPickerState extends State<CameraPicker>
       return;
     }
     ++currentCameraIndex;
-    print('CURRENTCAMERAINDEX: $currentCameraIndex');
     if (currentCameraIndex == cameras.length) {
       currentCameraIndex = 0;
     }
@@ -399,7 +396,6 @@ class CameraPickerState extends State<CameraPicker>
   /// Obtain the next camera description for semantics.
   CameraDescription get nextCameraDescription {
     final int nextIndex = currentCameraIndex + 1;
-    print('CURRENTCAMERAINDEX: $currentCameraIndex');
     if (nextIndex == cameras.length) {
       return cameras[0];
     }
