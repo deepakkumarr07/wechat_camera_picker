@@ -280,4 +280,11 @@ class VideoplayerValue {
   static VideoPlayerController? videoPlayerController;
   static String? errorMessage;
   static File? videoPlayerPath;
+
+  static void dispose() {
+    videostream.close();
+    videoPlayerController?.dispose();
+    errorMessage = '';
+    videoPlayerPath = null;
+  }
 }

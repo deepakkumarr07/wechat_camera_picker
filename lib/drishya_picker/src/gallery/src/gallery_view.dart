@@ -85,6 +85,7 @@ class _GalleryViewState extends State<GalleryView> {
     if (widget.controller == null || _controller.autoDispose) {
       _controller.dispose();
     }
+    VideoplayerValue.dispose();
     super.dispose();
   }
 
