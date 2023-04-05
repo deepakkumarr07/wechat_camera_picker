@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+
 import '../../../../../drishya_picker/drishya_picker.dart';
 import '../../../../../drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import '../../../../../drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import '../../../../../drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import '../../../../../drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import '../../../../../drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
-import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 ///
 class GalleryGridView extends StatelessWidget {
@@ -37,10 +38,10 @@ class GalleryGridView extends StatelessWidget {
       color: Colors.transparent,
       child: CurrentAlbumBuilder(
         albums: albums,
-        builder: (context, album, child) {
+        builder: (BuildContext context, Album album, Widget? child) {
           return ValueListenableBuilder<AlbumValue>(
             valueListenable: album,
-            builder: (context, value, child) {
+            builder: (BuildContext context, AlbumValue value, Widget? child) {
               // Error
               if (value.state == BaseState.unauthorised &&
                   value.entities.isEmpty) {
@@ -81,10 +82,10 @@ class GalleryGridView extends StatelessWidget {
                 );
               }
 
-              final entities = value.entities;
+              final List<AssetEntity> entities = value.entities;
               // final enableCamera = controller.setting.enableCamera;
 
-              final itemCount = albums.value.state == BaseState.fetching
+              final int itemCount = albums.value.state == BaseState.fetching
                   ? 20
                   : entities.length;
 
@@ -100,7 +101,7 @@ class GalleryGridView extends StatelessWidget {
                   ),
                   itemCount: itemCount,
                   padding: EdgeInsets.zero,
-                  itemBuilder: (context, index) {
+                  itemBuilder: (BuildContext context, int index) {
                     // if (enableCamera && index == 0) {
                     //   return InkWell(
                     //     onTap: () {
@@ -118,11 +119,12 @@ class GalleryGridView extends StatelessWidget {
                     //   );
                     // }
 
-                    final ind = index;
+                    final int ind = index;
 
-                    final entity = albums.value.state == BaseState.fetching
-                        ? null
-                        : entities[ind];
+                    final AssetEntity? entity =
+                        albums.value.state == BaseState.fetching
+                            ? null
+                            : entities[ind];
 
                     if (entity == null) return const SizedBox();
 
@@ -159,27 +161,33 @@ class _MediaTile extends StatelessWidget {
   Widget build(BuildContext context) {
     Uint8List? bytes;
 
-    final _panelController = PanelController();
+    final PanelController panelController = PanelController();
 
-    final drishya = entity.toDrishya;
+    final DrishyaEntity drishya = entity.toDrishya;
 
     return ColoredBox(
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () async {
-          final entity = drishya.copyWith(pickedThumbData: bytes);
-          VideoplayerValue.videoPlayerPath = await entity.file;
-          if (VideoplayerValue.videoPlayerController != null) {
-            await VideoplayerValue.videoPlayerController!.dispose();
-          }
-          VideoplayerValue.videoPlayerController =
-              VideoPlayerController.file(VideoplayerValue.videoPlayerPath!);
-          await VideoplayerValue.videoPlayerController!
-              .initialize()
-              .then((value) {
-            VideoplayerValue.videoPlayerController!.play();
+          try {
+            final DrishyaEntity entity =
+                drishya.copyWith(pickedThumbData: bytes);
+            VideoplayerValue.videoPlayerPath = await entity.file;
+            if (VideoplayerValue.videoPlayerController != null) {
+              await VideoplayerValue.videoPlayerController!.dispose();
+            }
+            VideoplayerValue.videoPlayerController =
+                VideoPlayerController.file(VideoplayerValue.videoPlayerPath!);
+            await VideoplayerValue.videoPlayerController!
+                .initialize()
+                .then((value) {
+              VideoplayerValue.videoPlayerController!.play();
+              VideoplayerValue.videosink.add('');
+            });
+          } on Exception {
+            VideoplayerValue.errorMessage = "Can't play Video";
             VideoplayerValue.videosink.add('');
-          });
+          }
           // controller.select(context, entity);
         },
         child: Stack(
@@ -187,7 +195,7 @@ class _MediaTile extends StatelessWidget {
           children: [
             EntityThumbnail(
               entity: drishya,
-              onBytesGenerated: (b) {
+              onBytesGenerated: (Uint8List? b) {
                 bytes = b;
               },
             ),
@@ -213,16 +221,16 @@ class _SelectionCount extends StatelessWidget {
   Widget build(BuildContext context) {
     return GalleryBuilder(
       controller: controller,
-      builder: (value, child) {
-        final actionBased =
+      builder: (GalleryValue value, Widget? child) {
+        final bool actionBased =
             controller.setting.selectionMode == SelectionMode.actionBased;
 
-        final singleSelection = actionBased
+        final bool singleSelection = actionBased
             ? !value.enableMultiSelection
             : controller.singleSelection;
 
-        final isSelected = value.selectedEntities.contains(entity);
-        final index = value.selectedEntities.indexOf(entity.toDrishya);
+        final bool isSelected = value.selectedEntities.contains(entity);
+        final int index = value.selectedEntities.indexOf(entity.toDrishya);
 
         Widget counter = const SizedBox();
 
@@ -264,11 +272,12 @@ class _SelectionCount extends StatelessWidget {
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 class VideoplayerValue {
   static StreamController videostream = StreamController<dynamic>.broadcast();
   static StreamSink get videosink => videostream.sink;
   static Stream get videoControllerStream => videostream.stream;
   static VideoPlayerController? videoPlayerController;
-
+  static String? errorMessage;
   static File? videoPlayerPath;
 }

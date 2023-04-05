@@ -72,6 +72,8 @@ class _GalleryViewState extends State<GalleryView> {
   void initState() {
     super.initState();
     if (VideoplayerValue.videoPlayerPath != null) {
+      VideoplayerValue.errorMessage = 'Please select a video';
+      VideoplayerValue.videosink.add('');
       VideoplayerValue.videoPlayerController =
           VideoPlayerController.file(VideoplayerValue.videoPlayerPath!);
     }
@@ -422,13 +424,17 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                                   )
                                 : ClipRRect(
                                     borderRadius: BorderRadius.circular(15),
-                                    child: const Center(
-                                      child: Text(
-                                        'Please select a video',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                                    child: Center(
+                                      child:
+                                          VideoplayerValue.errorMessage == null
+                                              ? Container()
+                                              : Text(
+                                                  VideoplayerValue.errorMessage
+                                                      .toString(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
                                     ),
                                   ),
                           );
