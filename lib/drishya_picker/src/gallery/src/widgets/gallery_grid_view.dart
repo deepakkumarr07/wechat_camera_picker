@@ -20,10 +20,13 @@ class GalleryGridView extends StatelessWidget {
     required this.controller,
     required this.albums,
     required this.onClosePressed,
+    required this.onpress,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
+
+  final void Function(File?) onpress;
 
   ///
   final Albums albums;
@@ -128,7 +131,11 @@ class GalleryGridView extends StatelessWidget {
 
                     if (entity == null) return const SizedBox();
 
-                    return _MediaTile(controller: controller, entity: entity);
+                    return _MediaTile(
+                      controller: controller,
+                      entity: entity,
+                      onpress: onpress,
+                    );
                   },
                 ),
               );
@@ -149,10 +156,13 @@ class _MediaTile extends StatelessWidget {
     Key? key,
     required this.entity,
     required this.controller,
+    required this.onpress,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
+
+  final void Function(File?) onpress;
 
   ///
   final AssetEntity entity;
@@ -169,26 +179,28 @@ class _MediaTile extends StatelessWidget {
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () async {
-          try {
-            final DrishyaEntity entity =
-                drishya.copyWith(pickedThumbData: bytes);
-            VideoplayerValue.videoPlayerPath = await entity.file;
-            if (VideoplayerValue.videoPlayerController != null) {
-              await VideoplayerValue.videoPlayerController!.dispose();
-            }
-            VideoplayerValue.videoPlayerController =
-                VideoPlayerController.file(VideoplayerValue.videoPlayerPath!);
-            await VideoplayerValue.videoPlayerController!
-                .initialize()
-                .then((value) {
-              VideoplayerValue.videoPlayerController!.play();
+          final DrishyaEntity entity = drishya.copyWith(pickedThumbData: bytes);
+          VideoplayerValue.videoPlayerPath = await entity.file;
+          if (controller.setting.requestType == RequestType.video) {
+            try {
+              if (VideoplayerValue.videoPlayerController != null) {
+                await VideoplayerValue.videoPlayerController!.dispose();
+              }
+              VideoplayerValue.videoPlayerController =
+                  VideoPlayerController.file(VideoplayerValue.videoPlayerPath!);
+              await VideoplayerValue.videoPlayerController!
+                  .initialize()
+                  .then((value) {
+                VideoplayerValue.videoPlayerController!.play();
+                VideoplayerValue.videosink.add('');
+              });
+            } on Exception {
+              VideoplayerValue.errorMessage = "Can't play Video";
               VideoplayerValue.videosink.add('');
-            });
-          } on Exception {
-            VideoplayerValue.errorMessage = "Can't play Video";
-            VideoplayerValue.videosink.add('');
+            }
+          } else if (controller.setting.requestType == RequestType.image) {
+            onpress(VideoplayerValue.videoPlayerPath);
           }
-          // controller.select(context, entity);
         },
         child: Stack(
           fit: StackFit.expand,

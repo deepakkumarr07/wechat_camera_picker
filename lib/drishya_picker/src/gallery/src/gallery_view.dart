@@ -343,110 +343,114 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                     // ),
 
                     // Gallery grid
-                    Expanded(
-                      flex: 65,
-                      child: StreamBuilder<dynamic>(
-                        stream: VideoplayerValue.videoControllerStream,
-                        builder:
-                            (BuildContext context, AsyncSnapshot snapshot) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: const BoxDecoration(),
-                            child: VideoplayerValue.videoPlayerController !=
-                                        null &&
-                                    VideoplayerValue.videoPlayerController!
-                                        .value.isInitialized
-                                ? Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: AspectRatio(
-                                          aspectRatio: VideoplayerValue
-                                              .videoPlayerController!
-                                              .value
-                                              .aspectRatio,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              // If the video is playing, pause it.
+                    if (_controller.setting.requestType == RequestType.video)
+                      Expanded(
+                        flex: 65,
+                        child: StreamBuilder<dynamic>(
+                          stream: VideoplayerValue.videoControllerStream,
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: const BoxDecoration(),
+                              child: VideoplayerValue.videoPlayerController !=
+                                          null &&
+                                      VideoplayerValue.videoPlayerController!
+                                          .value.isInitialized
+                                  ? Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          child: AspectRatio(
+                                            aspectRatio: VideoplayerValue
+                                                .videoPlayerController!
+                                                .value
+                                                .aspectRatio,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                // If the video is playing, pause it.
+                                                if (VideoplayerValue
+                                                    .videoPlayerController!
+                                                    .value
+                                                    .isPlaying) {
+                                                  VideoplayerValue
+                                                      .videoPlayerController!
+                                                      .pause();
+                                                } else {
+                                                  // If the video is paused, play it.
+                                                  VideoplayerValue
+                                                      .videoPlayerController!
+                                                      .play();
+                                                }
+                                                VideoplayerValue.videosink
+                                                    .add('');
+                                              },
+                                              child: VideoPlayer(
+                                                VideoplayerValue
+                                                    .videoPlayerController!,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 5,
+                                          right: 5,
+                                          child: ElevatedButton(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                Colors.white.withOpacity(0.5),
+                                              ),
+                                            ),
+                                            onPressed: () {
                                               if (VideoplayerValue
-                                                  .videoPlayerController!
-                                                  .value
-                                                  .isPlaying) {
+                                                      .videoPlayerController !=
+                                                  null) {
                                                 VideoplayerValue
                                                     .videoPlayerController!
                                                     .pause();
-                                              } else {
-                                                // If the video is paused, play it.
-                                                VideoplayerValue
-                                                    .videoPlayerController!
-                                                    .play();
                                               }
-                                              VideoplayerValue.videosink
-                                                  .add('');
+                                              widget.onpress(
+                                                VideoplayerValue
+                                                    .videoPlayerPath,
+                                              );
                                             },
-                                            child: VideoPlayer(
-                                              VideoplayerValue
-                                                  .videoPlayerController!,
+                                            child: const Text(
+                                              ' Next ',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      Positioned(
-                                        bottom: 5,
-                                        right: 5,
-                                        child: ElevatedButton(
-                                          style: ButtonStyle(
-                                            backgroundColor:
-                                                MaterialStateProperty.all(
-                                              Colors.white.withOpacity(0.5),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            if (VideoplayerValue
-                                                    .videoPlayerController !=
-                                                null) {
-                                              VideoplayerValue
-                                                  .videoPlayerController!
-                                                  .pause();
-                                            }
-                                            widget.onpress(
-                                              VideoplayerValue.videoPlayerPath,
-                                            );
-                                          },
-                                          child: const Text(
-                                            ' Next ',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Center(
-                                      child:
-                                          VideoplayerValue.errorMessage == null
-                                              ? Container()
-                                              : Text(
-                                                  VideoplayerValue.errorMessage
-                                                      .toString(),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                  ),
+                                      ],
+                                    )
+                                  : ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Center(
+                                        child: VideoplayerValue.errorMessage ==
+                                                null
+                                            ? Container()
+                                            : Text(
+                                                VideoplayerValue.errorMessage
+                                                    .toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
                                                 ),
+                                              ),
+                                      ),
                                     ),
-                                  ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
                     Expanded(
                       flex: 45,
                       child: GalleryGridView(
                         controller: _controller,
                         albums: _albums,
+                        onpress: widget.onpress,
                         onClosePressed: _onClosePressed,
                       ),
                     ),
