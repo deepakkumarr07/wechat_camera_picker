@@ -184,13 +184,13 @@ class _MediaTile extends StatelessWidget {
           if (controller.setting.requestType == RequestType.video) {
             try {
               if (VideoplayerValue.videoPlayerController != null) {
-                await VideoplayerValue.videoPlayerController!.dispose();
+                VideoplayerValue.videoPlayerController = null;
               }
               VideoplayerValue.videoPlayerController =
                   VideoPlayerController.file(VideoplayerValue.videoPlayerPath!);
               await VideoplayerValue.videoPlayerController!
                   .initialize()
-                  .then((value) {
+                  .then((_) {
                 VideoplayerValue.videoPlayerController!.play();
                 VideoplayerValue.videosink.add('');
               });
@@ -252,7 +252,7 @@ class _SelectionCount extends StatelessWidget {
             radius: 14,
             child: Text(
               '${index + 1}',
-              style: Theme.of(context).textTheme.button?.copyWith(
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
             ),
