@@ -295,7 +295,7 @@ class VideoplayerValue {
 
   static void dispose() {
     videostream.close();
-    videoPlayerController?.dispose();
+    // videoPlayerController?.dispose();
     errorMessage = '';
     videoPlayerPath = null;
   }
